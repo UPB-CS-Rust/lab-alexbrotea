@@ -3,7 +3,6 @@ fn main() {
     for i in 0..5 {
         data[i] = floored_half(data[i]);
     }
-
     println!("{:?}", data);
 }
 
