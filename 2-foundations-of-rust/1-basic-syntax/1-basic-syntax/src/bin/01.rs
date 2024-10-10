@@ -2,11 +2,11 @@ fn main() {
     println!("{}", multiply(10, 20));
 }
 
-fn multiply(a: i32, b: i32) {
+fn multiply(a: i32, b: i32) -> i32 {
     a * b
 }
 
-// Tests; run with `cargo test --bin 01`
+// Tests; run with cargo test --bin 01
 #[cfg(test)]
 mod tests {
     use super::*;
