@@ -2,9 +2,13 @@
 /// but is moved to the heap to grow larger if needed.
 /// This list is generic over the items it contains as well as the
 /// size of its buffer if it's on the stack.
+
 pub enum LocalStorageVec<T, const N: usize> {
-    // TODO add some variants containing data
-    // to make the compiler happy
+    Stack {
+        buf: [T; N],
+        len: usize,
+    },
+    Heap(Vec<T>),
 }
 
 // **Below `From` implementation is used in the tests and are therefore given. However,
@@ -25,7 +29,7 @@ where
         if N <= M {
             // In this case, the passed array should fit on the stack.
 
-            // We crate an `Iterator` of the passed array,
+            // We create an `Iterator` of the passed array,
             let mut it = array.into_iter();
             Self::Stack {
                 // This is a trick for copying an array into another one that's
@@ -41,9 +45,16 @@ where
                 len: N,
             }
         } else {
-            // If the passed array does not fit, we'll resort to moving it to the heap instead
             Self::Heap(Vec::from(array))
         }
+    }
+}
+
+impl<T, const M: usize> From<Vec<T>> for LocalStorageVec<T, M>
+where T: Default,
+{
+    fn from(new: Vec<T>) -> Self {
+            Self::Heap(new)
     }
 }
 
@@ -52,8 +63,7 @@ mod test {
     use crate::LocalStorageVec;
 
     #[test]
-    // Don't remove the #[ignore] attribute or your tests will take forever!
-    #[ignore = "This test is just to validate the definition of `LocalStorageVec`. If it compiles, all is OK"]
+    #[ignore]
     #[allow(unreachable_code, unused_variables)]
     fn it_compiles() {
         // Here's a trick to 'initialize' a type while not actually
@@ -76,20 +86,19 @@ mod test {
             }
         }
     }
+}
 
     // Uncomment me for part B
-    // #[test]
-    // fn it_from_vecs() {
+    #[test]
+    fn it_from_vecs() {
     //     // The `vec!` macro creates a `Vec<T>` in a way that resembles
     //     // array-initialization syntax.
-    //     let vec: LocalStorageVec<usize, 10> = LocalStorageVec::from(vec![1, 2, 3]);
+        let vec: LocalStorageVec<usize, 10> = LocalStorageVec::from(vec![1, 2, 3]);
     //     // Assert that the call to `from` indeed yields a `Heap` variant
-    //     assert!(matches!(vec, LocalStorageVec::Heap(_)));
-    //
-    //     let vec: LocalStorageVec<usize, 2> = LocalStorageVec::from(vec![1, 2, 3]);
-    //
-    //     assert!(matches!(vec, LocalStorageVec::Heap(_)));
-    // }
+        assert!(matches!(vec, LocalStorageVec::Heap(_)));
+        let vec: LocalStorageVec<usize, 2> = LocalStorageVec::from(vec![1, 2, 3]);
+        assert!(matches!(vec, LocalStorageVec::Heap(_)));
+    }
 
     // Uncomment me for part C
     // #[test]
@@ -280,4 +289,3 @@ mod test {
     //     let chunks = vec.chunks_mut(4);
     //     let slice: &mut [_] = vec.deref_mut();
     // }
-}
